@@ -118,6 +118,16 @@ Mulige mekanismer må vurderes mot behovet:
 | Batch | Data behandles samlet med et intervall, via API eller fil. |
 | Event/webhook | Systemet varsler når en relevant hendelse skjer. |
 
+### Aktuelle kandidater i TRVs teknologimiljø
+
+Valget bør passe med det TRV kan drifte og forvalte. Stillingsannonsen nevner Microsoft 365, SharePoint, Power Platform, Logic Apps, Power Automate og API-baserte integrasjoner. Jeg ville derfor vurdert eksisterende teknologi før en ny plattform:
+
+- **Logic Apps:** kandidat for «integrasjonsfunksjon ved behov», med mapping, validering, orkestrering, retry, logging, overvåking eller flere flyter.
+- **Power Automate:** kandidat for brukerorienterte arbeidsflyter, varsling og eventuell godkjenning.
+- **Power Apps / Microsoft 365:** mulige interne støtteflater rundt kjernesystemene dersom behovet oppstår.
+
+Dette er kandidater, ikke forhåndsvalgte løsninger. Leverandørstøtte og faktisk behov styrer valget; et mellomlag innføres ikke bare fordi teknologien finnes.
+
 Direkte leverandørintegrasjon er første kandidat dersom den er sikker og forvaltbar. En egen integrasjonsfunksjon må gi tydelig verdi gjennom eksempelvis mapping, validering, retry, logging/sporbarhet, overvåking, flere flyter eller løsere kobling.
 
 ![High-Level arkitektur](docs/04-teknisk-tilnaerming/high-level-arkitektur.png)
