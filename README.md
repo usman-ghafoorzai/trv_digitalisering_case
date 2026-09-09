@@ -12,29 +12,16 @@ Jeg har behandlet caset som et lite forprosjekt. Før jeg velger API eller tegne
 
 Jeg viser en rekkefølge her, men kartlegging, Use Case, krav og domenemodell ville utviklet seg i takt med nye avklaringer.
 
-## Sentrale avklaringer
+## Spørsmål som styrer analysen
 
-Arbeidet avdekket spørsmål som må avklares før løsningen låses:
+Allerede i casebeskrivelsen oppstår noen spørsmål som påvirker resten av løsningen:
 
-- **ERP støtter allerede timeføring.** Hvorfor trengs et separat system når ERP kan registrere og kategorisere timer mot prosjekt, delprosjekt og aktivitet? Arbeidshypotesen min er at tredjepartssystemet kan dekke den operative arbeidsprosessen bedre: stempling inn/ut, løpende registrering og aktivitetsskifte, rute/bemanning, oppfølging og godkjenning. Dette må valideres for å unngå overlappende prosesser, dobbeltregistrering og to ulike sannheter.
+- **Hva skal det nye systemet faktisk overta?** ERP støtter allerede timeføring, så ansvarsdelingen må avklares for å unngå dobbeltregistrering og to sannheter.
+- **Hvem skal eie hvilke data?** Toveis dataflyt betyr ikke at begge systemene skal eie og vedlikeholde de samme dataene.
+- **Hva må faktisk deles mellom systemene?** Målet er å utveksle den informasjonen mottakssystemet trenger.
+- **Hva vet vi ikke ennå?** Roller, datamodell, leverandørgrensesnitt og teknologivalg må valideres før løsningen låses.
 
-- **Toveis dataflyt betyr ikke toveis eierskap til alle data.** ERP er foreløpig kandidat som autoritativ kilde for ansatte, organisatorisk tilhørighet, prosjekt og delprosjekt. Tredjepartssystemet er kandidat som kilde for operative arbeidstidsregistreringer, rute/bemanning, oppfølging og godkjenning. Retur til ERP gjelder relevant godkjent arbeidsgrunnlag, ikke vedlikehold av ERP-masterdata.
-
-- **Aktivitet omtales som en «ekstra dimensjon».** Jeg vil derfor ikke automatisk plassere aktivitet under delprosjekt. Hva betyr den i ERP, hvordan brukes den, og er den en separat klassifiseringsdimensjon? Dette må avklares før vi bestemmer om og hvordan den skal mappes.
-
-- **Rute/bemanning er ikke automatisk prosjektføring.** De kan være parallelle behov. En rute bestemmer ikke nødvendigvis prosjekt, delprosjekt eller aktivitet; en eventuell kobling må avklares.
-
-- **Godkjenning og roller må avklares.** Operativ leder er en naturlig kandidat for operativ godkjenning. HR/lønn kan ha kontroll-, oppfølgings- og avviksansvar, men virksomheten må avklare den endelige arbeidsdelingen.
-
-- **Arbeidstid kan beregnes fra hendelser.** Innstempling, arbeidsperioder, prosjekt-/aktivitetsskifte og utstempling kan gi arbeidstiden uten en separat manuell registrering av «faktisk arbeidstid».
-
-- **Lønnsarter ved behov.** ERP har lønnsarter, men det må avklares om de skal overføres og brukes til klassifisering i tredjepartssystemet, eller om ERP/lønn skal utlede dem fra godkjent arbeidsgrunnlag.
-
-- **Ikke alle data trenger å flyttes.** Rute-, bemannings- og detaljert avviksinformasjon kan bli værende i tredjepartssystemet. Hvis et avvik påvirker arbeidstiden, kan det korrigerte og godkjente resultatet være det ERP trenger, fremfor hele historikken.
-
-- **Integrasjonen må gå gjennom støttede grensesnitt.** Den skal ikke skrive direkte til systemenes databaser. Hvert system eier og oppdaterer sitt eget datalag.
-
-- **Teknologivalget er åpent.** API, fil, batch, event/webhook og eventuell integrasjonsfunksjon må vurderes mot leverandørstøtte, oppdateringsbehov, datamengde, mapping og feil- og driftsbehov.
+Disse spørsmålene følger gjennom resten av analysen.
 
 ---
 
@@ -44,13 +31,17 @@ Før jeg kan bestemme hva det nye systemet skal overta, må jeg forstå dagens a
 
 Det krever innspill fra operative ansatte, operativ ledelse, HR/lønn, økonomi, HMS/kvalitet, logistikk/ruteplanlegging, IT og leverandørene. Forprosjektet skal redusere usikkerheten før vi begynner å bygge.
 
+**Systemansvar / overlapp:** ERP støtter allerede registrering og kategorisering av timer mot prosjekt, delprosjekt og aktivitet. Hva skal tredjepartssystemet overta eller gjøre bedre? Arbeidshypotesen min er at det kan dekke den operative prosessen bedre: stempling inn/ut, løpende registrering og aktivitetsskifte, rute/bemanning, oppfølging og godkjenning. Dette må valideres for å unngå overlappende prosesser, dobbeltregistrering og to ulike sannheter.
+
 ### Use Case
 
 Når aktørene er identifisert, bruker jeg Use Case for å avklare **hvem som faktisk skal gjøre hva i den nye arbeidsprosessen**.
 
-Operativ ansatt registrerer, operativ leder/ruteplanlegger planlegger og følger opp, mens HR/lønn og HMS/kvalitet har kontroll- og oppfølgingsbehov. Rollebildet er foreløpig, særlig ansvaret for godkjenning.
+Operativ ansatt registrerer, operativ leder/ruteplanlegger planlegger og følger opp, mens HR/lønn og HMS/kvalitet har kontroll- og oppfølgingsbehov.
 
 ![Use Case](docs/02-krav-og-analyse/use-case.png)
+
+**Avklaring:** Operativ leder er en naturlig kandidat for godkjenning av arbeidstid, mens HR/lønn kan ha kontroll-, oppfølgings- og avviksansvar. Den endelige arbeidsdelingen må avklares med virksomheten.
 
 [Forprosjektplan](docs/01-forprosjekt/forprosjektplan.pdf)\
 [Kravdokumentasjon](docs/02-krav-og-analyse/kravdokumentasjon.pdf)
@@ -69,9 +60,15 @@ Hovedkjeden jeg har brukt er:
 
 **Operativ ansatt → Arbeidsøkt → Arbeidstidsregistrering → relevant prosjekt/delprosjekt/aktivitet**
 
-Modellen er konseptuell og viser forretningsbegreper og relasjoner, ikke database- eller API-design. En ansatt tilhører en organisasjonsenhet og kan bemannes på en rute. En arbeidsøkt kan ha avvik som må følges opp. Aktivitet som ekstra dimensjon og en eventuell kobling mellom rute og prosjekt må avklares før modellen detaljeres.
+Modellen er konseptuell og viser forretningsbegreper og relasjoner, ikke database- eller API-design. En ansatt tilhører en organisasjonsenhet og kan bemannes på en rute. En arbeidsøkt kan ha avvik som må følges opp.
 
 ![Domenemodell](docs/02-krav-og-analyse/domenemodell.png)
+
+**Avklaringer fra modellen:**
+
+- **Aktivitet** omtales som en «ekstra dimensjon» og bør ikke automatisk plasseres under delprosjekt. Betydning, bruk og eventuell separat klassifisering i ERP må avklares før vi bestemmer om og hvordan den skal mappes.
+- **Rute/bemanning** og prosjekt-/aktivitetsføring kan være parallelle behov. En rute bestemmer ikke nødvendigvis prosjekt, delprosjekt eller aktivitet; en eventuell kobling må avklares.
+- **Arbeidstid** kan beregnes fra innstempling, arbeidsperioder, prosjekt-/aktivitetsskifte og utstempling, fremfor en separat manuell registrering av «faktisk arbeidstid».
 
 Når begrepene og relasjonene er tydeligere, kan jeg spørre hvor dataene finnes, hvem som bør eie dem og hvor de må videre.
 
@@ -83,11 +80,18 @@ Informasjonsflyten knytter begrepene til systemene. Med dataeierskapet som arbei
 **Tredjepartssystem:** operativ registrering, rute/bemanning, oppfølging og godkjenning\
 **Tredjepartssystem → ERP:** relevant godkjent arbeidsgrunnlag
 
-Aktivitet må avklares, og lønnsarter overføres ved behov. Arbeidsgrunnlaget tilbake kan omfatte ansattreferanse, dato/periode, godkjente timer og relevant prosjekt-, delprosjekt- og aktivitetsinformasjon. Øvrige operative data deles bare dersom ERP trenger dem.
+Arbeidsgrunnlaget tilbake kan omfatte ansattreferanse, dato/periode, godkjente timer og relevant prosjekt-, delprosjekt- og aktivitetsinformasjon.
 
 **Målet er ikke å holde to komplette systemkopier synkronisert, men å etablere tydelig dataeierskap og flytte den informasjonen mottakssystemet faktisk trenger.**
 
 ![Informasjonsflyt](docs/03-data-og-integrasjoner/informasjonsflyt.png)
+
+**Avklaringer fra informasjonsflyten:**
+
+- **Toveis dataflyt betyr ikke toveis eierskap til alle data.** ERP er foreløpig kandidat som autoritativ kilde for ansatte, organisatorisk tilhørighet, prosjekt og delprosjekt. Tredjepartssystemet er kandidat som kilde for operative arbeidstidsregistreringer, rute/bemanning, oppfølging og godkjenning.
+- **Retur til ERP** gjelder relevant godkjent arbeidsgrunnlag, ikke vedlikehold av ERP-masterdata.
+- **Dataomfang og avvik:** Rute-, bemannings- og detaljert avviksinformasjon kan bli værende i tredjepartssystemet dersom ERP ikke trenger den. Påvirker et avvik arbeidstiden, kan det korrigerte og godkjente resultatet være tilstrekkelig, fremfor hele avvikshistorikken.
+- **Lønnsarter ved behov:** ERP har lønnsarter, men det må avklares om de skal overføres og brukes til klassifisering i tredjepartssystemet, eller om ERP/lønn skal utlede dem fra godkjent arbeidsgrunnlag.
 
 Når dataeierskap, retning og informasjonsbehov er tydeligere, kan denne flyten oversettes til en teknisk kandidatarkitektur.
 
@@ -109,7 +113,7 @@ Pilene forutsetter ingen direkte databaseintegrasjon. De må forstås slik:
 
 **Integrasjon → støttet grensesnitt → applikasjon → systemets eget datalag**
 
-Mulige mekanismer må vurderes mot behovet:
+**Tekniske avklaringer:** API, fil, batch og event/webhook må vurderes mot leverandørstøtte, oppdateringsbehov, datamengde, mapping og feil- og driftsbehov:
 
 | Mekanisme | Hva den innebærer |
 |---|---|
